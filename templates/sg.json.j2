@@ -18,7 +18,7 @@
         {% for rules in sg_rules %}
         {% if sg_internal_cidrs is defined %}
         {% for cidr in sg_internal_cidrs %}
-        { "FromPort": "{{ rules.fromPort }}", "ToPort": "{{ rules.toPort }}", "IpProtocol": "tcp", "CidrIp": "{{ cidr }}" } {% if not loop.last %}, {% endif %}
+        { "FromPort": "{{ rules.fromPort }}", "ToPort": "{{ rules.toPort }}", "IpProtocol": "{{ protocol }}", "CidrIp": "{{ cidr }}" } {% if not loop.last %}, {% endif %}
         {% endfor %}
         {% endif  %}
         {% if not loop.last %}, {% endif %}
@@ -26,7 +26,7 @@
         {% else %}{# rules allowed from 0.0.0.0/0, for internet-facing Security Groups #}
         {% for rules in sg_rules %}
         {% if sg_source|default(['0.0.0.0/0']) %}
-        { "FromPort": "{{ rules.fromPort }}", "ToPort": "{{ rules.toPort }}", "IpProtocol": "tcp", "CidrIp": "{{ sg_source | default('0.0.0.0/0')}}" } {% if not loop.last %}, {% endif %}
+        { "FromPort": "{{ rules.fromPort }}", "ToPort": "{{ rules.toPort }}", "IpProtocol": "{{ protocol }}", "CidrIp": "{{ sg_source | default('0.0.0.0/0')}}" } {% if not loop.last %}, {% endif %}
         {% endif %}
         {% if not loop.last %}, {% endif %}
         {% endfor %}
@@ -45,7 +45,7 @@
           {
             "FromPort": "{{ rules.instanceFromPort }}",
             "ToPort": "{{ rules.instanceToPort }}",
-            "IpProtocol": "tcp",
+            "IpProtocol": "{{ instanceProtocol }}",
             "SourceSecurityGroupId": { "Ref": "SecurityGroup" }
           }{% if not loop.last %}, {% endif %}
         {% endfor %}
@@ -58,7 +58,7 @@
         "Type": "AWS::EC2::SecurityGroupEgress",
         "Properties": {
           "GroupId": { "Ref": "SecurityGroup" },
-          "IpProtocol": "tcp",
+          "IpProtocol": "{{ instanceProtocol }}",
           "FromPort": "{{ rules.instanceFromPort }}",
           "ToPort": "{{ rules.instanceToPort }}",
           "DestinationSecurityGroupId": { "Ref": "BackendSecurityGroup" }
